@@ -1,0 +1,11 @@
+#+title: Project TODOs
+* Current project TODOs
+** TODO Refactor: add =show_hline=
+[2025-05-09 Fri 23:05]
+[[file:~/projects/qopt-overview/anxiety/anxiety.py::def try_scan():]]
+** TODO Ignore =\rev{}= directives
+[2025-05-09 Fri 20:47]
+ - [ ] hardcoded directive
+ - [ ] read directives from the ignorefile
+** TODO Suggest open-on-click in terminal
+my story with =openline= script, =emacsclient=, and =alacritty= terminal.

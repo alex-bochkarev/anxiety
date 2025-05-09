@@ -1,0 +1,26 @@
+#+title: Anxiety for .tex files
+
+This is a tool for writing reviewer response letters and making sure that the
+quotes are consistent between the paper text and the letter. Sometimes, =anxiety= helps a little.
+
+As of now, it is just a proof of concept.
+
+* Usage:
+- in the =.tex= file(s), mark the blocks that you want to remain consistent with
+  the comment lines, as follows:
+
+  #+begin_quote
+ % begin quote q1
+  (your text here)
+
+ % end quote q1
+  #+end_quote
+
+  Then, if two such blocks appear across the input files, they will be =diff=-ed,
+  and the changes must be highlighted in the program output.
+
+- To check consistency just feed the filenames to the tool as inputs, e.g.:
+
+  #+begin_src bash
+$ python -m anxiety tests/*.tex
+  #+end_src

@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+*.log
+tmp/
+.venv
+.auctex-auto
+
+*.py[cod]
+*.egg
+build
+htmlcov
