@@ -3,18 +3,25 @@
 This is a tool for writing reviewer response letters and making sure that the
 quotes are consistent between the paper text and the letter. Sometimes, =anxiety= helps a little.
 
-As of now, it is just a proof of concept.
+As of now, it is just a proof of concept, and not considered ready for use besides testing.
+
+* Prerequisites
+
+The program is usable as a single file ([[./anxiety.py]]). Prerequisites are:
+#+begin_src bash
+$ pip install --user diff_match_patch rich
+#+end_src
 
 * Usage:
 - in the =.tex= file(s), mark the blocks that you want to remain consistent with
   the comment lines, as follows:
 
-  #+begin_quote
+  #+begin_src latex
  % begin quote q1
   (your text here)
 
  % end quote q1
-  #+end_quote
+  #+end_src
 
   Then, if two such blocks appear across the input files, they will be =diff=-ed,
   and the changes must be highlighted in the program output.
