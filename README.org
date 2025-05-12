@@ -24,3 +24,11 @@ As of now, it is just a proof of concept.
   #+begin_src bash
 $ python -m anxiety tests/*.tex
   #+end_src
+
+
+Example: see [[./tests/file1.tex]] (an "original text" file) and [[./tests/letter.tex]]
+(a "letter with quotes"). To test the program:
+
+  #+begin_src bash
+$ python -m anxiety tests/file1.tex tests/letter.tex
+  #+end_src

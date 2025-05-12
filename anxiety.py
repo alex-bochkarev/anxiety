@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.text import Text
 import diff_match_patch as dmp_module
 
+
 def show_diffblock(str1, str2, quoteid, filename1, filename2, line1, line2):
     """Shows a single diff for a pair of strings.
 
@@ -26,7 +27,7 @@ def show_diffblock(str1, str2, quoteid, filename1, filename2, line1, line2):
     result.append(Text(f"=== [begin of "))
     result.append(Text(f"{quoteid}", style="cyan"))
     result.append("] " + "".join(["=" for _ in range(max(0, 70 - len(f"{quoteid}")-16))]) + "\n")
-    result.append(Text(f"Locations: {filename2}:{line2} (vs {filename1}:{line1})\n\n"))
+    result.append(Text(f"Locations: {filename1}:{line1} (vs {filename2}:{line2})\n\n"))
 
     for op, data in diffs:
         if op == 0:  # Equal
@@ -179,7 +180,7 @@ class FileScanner:
                 console.print(f"read {len(lines)} lines from {filename}. Parsing...\n")
 
             for n, line in enumerate(lines):
-                self.parse_line(line, filename=filename, line=n)
+                self.parse_line(line, filename=filename, line=(n+1))
 
             if self.verbose:
                 print(f"Recovered quotes:")
@@ -193,7 +194,6 @@ class FileScanner:
     def compare_quotes(self):
         """Performs the actual comparison of the (scanned) quotes."""
         console = Console()
-        print("Comparing the quotes:")
 
         for quoteid in self.quotes:
             if len(self.quotes[quoteid]) == 1:
@@ -215,14 +215,14 @@ class FileScanner:
                     (cquote.locend == quote.locend):
                         continue  # that's the same entry
 
-                    print(f"Comparing {quoteid} from {cquote.filename} vs {quote.filename}...", end="")
-                    different, res = show_diffblock(cquote.text, quote.text, quoteid,
-                                                    cquote.filename, quote.filename,
-                                                    cquote.locstart, quote.locstart)
+                    print(f"Comparing {quoteid} from {quote.filename} vs {cquote.filename}...", end="")
+                    different, res = show_diffblock(quote.text, cquote.text, quoteid,
+                                                    quote.filename, cquote.filename,
+                                                    quote.locstart, cquote.locstart)
 
                     if different:
                         console.print()
-                        console.print(res)
+                        console.print(res, width=70, overflow="fold")
                     else:
                         console.print("(no differences)")
 
