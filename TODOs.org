@@ -9,3 +9,7 @@
  - [ ] read directives from the ignorefile
 ** TODO Suggest open-on-click in terminal
 my story with =openline= script, =emacsclient=, and =alacritty= terminal.
+** TODO Fix: =%end quote= and =%begin quote=
+        In general, be more permissive with opening/closing directives. (Regex stuff.)
+** TODO Generate warnings on patterns?
+=\abinline=, etc?

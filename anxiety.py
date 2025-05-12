@@ -126,21 +126,40 @@ class FileScanner:
                     print(f"INFO: Marking {filename} as canonical for {quoteid}")
                 self.canonical[quoteid] = self.quotes[quoteid][-1]
 
+            self.quotes_open += 1
             return
 
         # check if this is a closing clause
         if string.lower().startswith("% end quote"):
             # trying to close a quote
             quoteid = string[len("% end quote"):].strip()
-            # FIXME: close the quote without ID if that's the only one
             for s in self.ignored_chars:
                quoteid = quoteid.replace(s, "")
 
             quoteid=quoteid.strip().lower()
 
+            if (self.quotes_open == 1) and (quoteid==""):
+                # It is obvious which quote to close
+                for candquote in self.quotes:
+                    if self.qstatus[candquote] == "open":
+                        quoteid = candquote
+
+                if quoteid != "":
+                    if self.verbose:
+                        print(f"Info: {filename}:{line} -- closing quote '{quoteid}' (no other options).")
+
             if quoteid == "":
-                print(f"Warning: {filename}:{line} -- ignoring (closing) a quote without id.")
-                return # ignore
+                print(f"Warning: {filename}:{line} -- a closing quote directive without an id. ")
+                if self.quotes_open > 1:
+                    print("However, this is ambiguous, as currently open quotes are:")
+                    for qid in self.quotes:
+                        if self.qstatus[qid] == "open":
+                            print(f"- {qid}")
+                    exit(1)
+                else:
+                    print(" (No quotes are open.)")
+                    return # ignore
+
 
             if quoteid not in self.quotes:
                 raise ValueError(f"{filename}:{line} -- ERROR: did not see quote id '{quoteid}' before. Wrong quote id?")
@@ -153,6 +172,7 @@ class FileScanner:
             self.qstatus[quoteid] = "closed"
             quote = self.quotes[quoteid][-1]
             quote.locend = line
+            self.quotes_open -= 1
 
             for p in self.postprocessors:
                 quote.text = p(quote.text)
@@ -191,6 +211,12 @@ class FileScanner:
                         print(quote.text)
                         print("\n\n")
 
+            if self.quotes_open > 0:
+                print("Warning: open quotes remaining at the end of the file:")
+                for qid in self.quotes:
+                    if self.qstatus[qid] == "open":
+                        print(f"- {qid}")
+
     def compare_quotes(self):
         """Performs the actual comparison of the (scanned) quotes."""
         console = Console()
@@ -215,7 +241,7 @@ class FileScanner:
                     (cquote.locend == quote.locend):
                         continue  # that's the same entry
 
-                    print(f"Comparing {quoteid} from {quote.filename} vs {cquote.filename}...", end="")
+                    print(f"Comparing '{quoteid}' from {quote.filename} vs {cquote.filename}...", end="")
                     different, res = show_diffblock(quote.text, cquote.text, quoteid,
                                                     quote.filename, cquote.filename,
                                                     quote.locstart, cquote.locstart)
@@ -240,8 +266,9 @@ def expand_filenames(patterns):
             files.append(pattern)
     return files
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Input files to worry about.')
+def main():
+    parser = argparse.ArgumentParser(prog="anxiety",
+                                     description='Input files to worry about.')
     parser.add_argument('files', nargs='+', help='Input file(s) or glob pattern(s)')
     args = parser.parse_args()
 
@@ -250,6 +277,9 @@ if __name__ == '__main__':
         fs.add_file(infile)
 
     fs.compare_quotes()
+
+if __name__ == '__main__':
+    main()
 
 ## Testing and experimentation code
 def try_scan():

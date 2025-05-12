@@ -32,3 +32,8 @@ Example: see [[./tests/file1.tex]] (an "original text" file) and [[./tests/lette
   #+begin_src bash
 $ python -m anxiety tests/file1.tex tests/letter.tex
   #+end_src
+
+* Notes
+
+- The mapping between the quotes need not be one-to-one, in the sense that one
+  canonical quote can be compared to arbitrary number of other notes, if the quote IDs coincide.
