@@ -2,6 +2,7 @@
 
 from rich.console import Console
 from rich.text import Text
+import re
 import diff_match_patch as dmp_module
 
 
@@ -252,6 +253,48 @@ class FileScanner:
                     else:
                         console.print("(no differences)")
 
+
+def check_for_warnings(files, patterns, ignores, pattern_type,
+                       context_sym=160):
+    """Checks a list of files for warnings."""
+
+    print(f"\n⁂\n\nChecking for pre-defined patterns of type '{pattern_type}',")
+    print(f"showing {context_sym} symbols for context.")
+    console = Console()
+
+    nmatches = 0
+    for infile in files:
+        nmatches_file = 0
+        with open(infile, 'r') as file:
+            content = file.read()
+            for pattern in patterns:
+                matches = re.finditer(pattern, content, re.MULTILINE)
+                if not matches:
+                    console.print(f"✓ {infile} -- OK", style="green")
+
+                ignored = False
+                for m in matches:
+                    for ign in ignores:
+                        if re.match(ign, m.group()):
+                            ignored = True
+
+                    if not ignored:
+                        nmatches_file += 1
+                        start, end = m.span()
+                        linum_s = content.count('\n', 0, start)+1
+                        linum_e = content.count('\n', 0, end)+1
+                        console.print(f"• {pattern_type} at {infile}:{linum_s} - {linum_e}:", style="yellow")
+                        console.print(f"...{content[max(start-context_sym,0):start]}",
+                                    end="")
+                        console.print(m.group(), style='red', end="")
+                        console.print(content[end:min(end+context_sym, len(content))],
+                                    end="...")
+                        console.print("(end)\n", style="yellow")
+
+                console.print(f"✓ {nmatches_file} cases found in {infile}.")
+                nmatches += nmatches_file
+    console.print(f"Done. Total of {nmatches} cases of '{pattern_type}' found across {len(files)} files.")
+
 import glob
 import argparse
 
@@ -267,16 +310,51 @@ def expand_filenames(patterns):
     return files
 
 def main():
+    warnings = {
+    "talk": ([r'\\abinline{.+}',
+             r'\\ab{.+}',
+             r'\\sveninline{.+}',
+             r'\\sven{.+}',
+             r'\\philine{.+}',
+             r'\\rhinline{.+}',
+             r'\\rh{.+}',
+             r'\\anita{.+}'], []),
+    "TODO": ([r'TODO',
+              r'FIXME'], []),
+    "comment-outs": ([r'^\s*%.*$'], ['^\s*%\s*begin\s*quote.*$','^\s*%\s*end\s*quote.*$'])
+    }
     parser = argparse.ArgumentParser(prog="anxiety",
                                      description='Input files to worry about.')
     parser.add_argument('files', nargs='+', help='Input file(s) or glob pattern(s)')
+
+    parser.add_argument('--show', type=lambda s: [item.strip() for item in s.split(',')],
+                        help="Worrisome things to show (" + \
+                        "/".join([w for w in warnings]) + "/quotes/all)",
+                        default=['quotes'])
+
+    parser.add_argument('--context-sym', help="Number of symbols to show before/after the warning match",
+                        type=int, default=160)
     args = parser.parse_args()
 
-    fs = FileScanner(verbose=False)
-    for infile in expand_filenames(args.files):
-        fs.add_file(infile)
+    files = [infile for infile in expand_filenames(args.files)]
 
-    fs.compare_quotes()
+    if ("quotes" in args.show) or ("all" in args.show):
+        fs = FileScanner(verbose=False)
+        for infile in files:
+            fs.add_file(infile)
+
+        fs.compare_quotes()
+
+    for w in warnings:
+        if (w in args.show) or ("all" in args.show):
+            patterns, ignores = warnings[w]
+            check_for_warnings(files, patterns, ignores, w,
+                               args.context_sym)
+
+    for s in args.show:
+        if (s not in warnings) and (s not in ['all', 'quotes']):
+            print(f"Warning: unknown artifact type, '{s}'.")
+
 
 if __name__ == '__main__':
     main()

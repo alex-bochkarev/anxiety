@@ -11,8 +11,18 @@
 my story with =openline= script, =emacsclient=, and =alacritty= terminal.
 ** TODO Fix: =%end quote= and =%begin quote=
         In general, be more permissive with opening/closing directives. (Regex stuff.)
-** TODO Generate warnings on patterns?
-=\abinline=, etc?
 ** TODO Make proper installation / update procedure
+Relevant: https://stackoverflow.com/questions/15268953/how-to-install-python-package-from-github
 ** TODO Refactor: separate output
 Highlight warnings, errors, and infos.
+** TODO Add test cases
+With =different= result, it must be straightforward to test.
+- spaces/newlines insensitivity
+- commented out lines
+- nested quotes (incl. overlapping)
+** TODO Add license
+** TODO Improve the docs / comment / lint
+- remove examples from =tests= to =docs=.
+** DONE Generate warnings on patterns?
+- State "DONE"       from "TODO"       [2025-05-16 Fri 17:26]
+=\abinline=, etc?

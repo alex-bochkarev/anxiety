@@ -1,9 +1,11 @@
 #+title: Anxiety for .tex files
 
-This is a tool for writing reviewer response letters and making sure that the
-quotes are consistent between the paper text and the letter. Sometimes, =anxiety= helps a little.
+This tool is aimed to help make sure reviewer response letters are consistent
+with the paper text. Sometimes, we just need to compare everything to
+everything... and then =anxiety= helps a little.
 
-As of now, it is just a proof of concept, and not considered ready for use besides testing.
+As of now, it is just a proof of concept, and not considered ready for use by
+general public besides testing.
 
 * Prerequisites
 
@@ -12,9 +14,12 @@ The program is usable as a single file ([[./anxiety.py]]). Prerequisites are:
 $ pip install --user diff_match_patch rich
 #+end_src
 
+Tested on Linux (please [[mailto:a@bochkarev.io][report]] if it works on Mac as well, if you have any info!)
+
 * Usage:
-- in the =.tex= file(s), mark the blocks that you want to remain consistent with
-  the comment lines, as follows:
+The core function:
+- in the =.tex= file(s), mark the blocks that you want to
+  remain consistent using the comment lines as follows:
 
   #+begin_src latex
  % begin quote q1
@@ -24,7 +29,13 @@ $ pip install --user diff_match_patch rich
   #+end_src
 
   Then, if two such blocks appear across the input files, they will be =diff=-ed,
-  and the changes must be highlighted in the program output.
+  and the changes will be highlighted in the program output. If an exclamation
+  mark =!= appears anywhere in the quote ID (the text after `begin quote`, i.e.,
+  `q1` in the example above), it is treated as 'canonical'. I.e., other
+  encounters will be compared against this one.
+
+  *Note:* In obvious cases (when the quotes are not embedded within each other),
+  quote ID can be omitted in the `end quote` comment.
 
 - To check consistency just feed the filenames to the tool as inputs, e.g.:
 
@@ -39,6 +50,14 @@ Example: see [[./tests/file1.tex]] (an "original text" file) and [[./tests/lette
   #+begin_src bash
 $ python -m anxiety tests/file1.tex tests/letter.tex
   #+end_src
+
+Further convenience magic: =python -m anxiety --show <WHAT> ./*.tex= will highlight regex matches. Specifically, depending on the value of =<WHAT>=:
+- =talk= -- will show comments (i.e., custom tags used for comments/discussions, such as =\abinline=),
+- =TODO= -- obviously, TODO keywords (as of now: =TODO= and =FIXME=).
+- =comment-outs= -- highlight lines that comrise only comments (i.e., look as if
+  they are completely commented out and perhaps should be deleted.)
+- =quotes= (default) -- nothing, just make the quotes comparison as discussed above.
+- =all= -- run all the possible checks.
 
 * Notes
 
